@@ -7,26 +7,36 @@ import (
 
 func main() {
 
-	file, error := os.OpenFile("empty_second.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	arg := os.Args[1:]
 
-	if error != nil {
-		fmt.Println("Something was wrong")
+	dirFile, err := os.OpenFile("dirs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	if err != nil {
+		fmt.Println("Something wrong happend")
 		return
 	}
-
-	defer func(file *os.File) {
-		err := file.Close()
+	defer func(dirFile *os.File) {
+		err := dirFile.Close()
 		if err != nil {
 
 		}
-	}(file)
+	}(dirFile)
 
-	_, err := file.WriteString("Hello, My Good Old Friend\n")
-	if err != nil {
-		fmt.Printf("There was an error writing to a file named: %s\n", file.Name())
+	if len(arg) < 1 {
+		fmt.Println("No arguments")
 		return
 	}
 
-	fmt.Printf("Data was successfully writtent into file named: %s\n", file.Name())
+	for i := 0; i < len(arg); i++ {
+		directory := arg[i]
+		files, _ := os.ReadDir(directory)
+		dirFile.WriteString(directory + "               \n")
+		for x := range files {
+			fd, _ := files[x].Info()
+			if fd.IsDir() {
+				dirFile.WriteString("              " + fd.Name() + "\n")
+			}
+		}
+	}
 
 }
